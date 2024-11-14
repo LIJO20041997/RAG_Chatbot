@@ -1,13 +1,12 @@
-from langchain_community.llms import OpenAI
+from langchain_openai import OpenAI
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
-from langchain_community.embeddings import OpenAIEmbeddings
+from langchain_openai import OpenAIEmbeddings
 from langchain.chains import create_retrieval_chain
 from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFLoader
-from fastapi import FastAPI,HTTPException,UploadFile,File
-from io import BytesIO
+from fastapi import FastAPI,HTTPException
 
 
 from dotenv import load_dotenv
@@ -17,28 +16,36 @@ load_dotenv()
 PDF_PATH = "Documents/attention-is-all-you-need-Paper.pdf"
 
 def get_pdf_text(PDF_PATH):
-    texts = ""
     pdf_reader = PyPDFLoader(PDF_PATH)
     documents = pdf_reader.load()
-    for docs in documents:
-        texts+=docs.page_content
-    return texts
+    return documents
 
 
-def get_chunks(text):
+def get_chunks(documents):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap=100)
-    chunks = text_splitter.split_text(text)
+    chunks = []
+    for doc in documents:
+        split_texts = text_splitter.split_text(doc.page_content)
+        for split_text in split_texts:
+            chunks.append({
+                "page_content":split_text,
+                "metadata":{"source":PDF_PATH, "page":doc.metadata['page']}
+            })
     return chunks
 
 def get_vectorstore(chunks):
     embeddings = OpenAIEmbeddings()
-    vectorstore = FAISS.from_texts(chunks, embedding=embeddings)
+    texts = [chunk["page_content"]for chunk in chunks]
+    metadata = [chunk["metadata"] for chunk in chunks]
+    vectorstore = FAISS.from_texts(texts, embedding=embeddings, metadatas=metadata)
     vectorstore.save_local("FAISS_DB")
     return vectorstore
 
 def generate_response(vectorstore,question:str):
     retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k":7})
     llm = OpenAI(temperature=0.4, max_tokens=200)
+
+    docs = retriever.invoke(question)
 
     system_prompt = (
         "You are an assistant for question-answering task. "
@@ -52,8 +59,16 @@ def generate_response(vectorstore,question:str):
     question_answer_chain = create_stuff_documents_chain(llm,prompt)
     rag_chain = create_retrieval_chain(retriever,question_answer_chain)
 
-    response = rag_chain.invoke({"input": question})
-    return response['answer']
+    responses = []
+    for doc in docs:
+        response = rag_chain.invoke({"input": question, "context": doc.page_content})
+        responses.append({
+            "answer": response['answer'],
+            "source": doc.metadata.get("source","unkown source"),
+            "page": doc.metadata.get("page","unknown page")
+            })
+
+    return {"response": responses}
 
 app= FastAPI()
 
@@ -64,9 +79,8 @@ async def process_pdf_questioning(question:str=''):
         chunks = get_chunks(documents)
         vectorstore = get_vectorstore(chunks)
         answer = generate_response(vectorstore, question)
-        return{
-            "status":True,
-            "answer":answer
+        return {
+            "result":answer
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
