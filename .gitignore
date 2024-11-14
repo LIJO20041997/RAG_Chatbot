@@ -1,3 +1,2 @@
 .env
-Documents
-FAISS_DB
+__pycache__
