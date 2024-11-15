@@ -6,7 +6,7 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
 - Text Chunking: Splits document text into smaller chunks using RecursiveCharacterTextSplitter for efficient retrieval.
 - Vector Database (FAISS): Stores document chunks as embeddings using FAISS for similarity-based search.
 - Language Model (LLM): OpenAI’s GPT-based model processes user queries and generates answers based on the retrieved context.
-- Chat API Endpoint: Exposes a /questioning_pdf/ endpoint using FastAPI to interact with the chatbot.
+- Chat API Endpoint: Exposes a rag/questioningpdf/chat/ endpoint using FastAPI to interact with the chatbot.
 ## Key Components
 - LangChain: For document processing, embedding creation, and retrieval.
 - FAISS: For storing and retrieving document embeddings.
@@ -91,9 +91,8 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
                 "answer": "The capital of France is Paris.",
                 "source": "Documents/european_countries.pdf",
                 "page": 2
-            }
-            ]
-   }
+            }]         
+        }
 ## Future Improvements
 - Support for Additional Formats: Extend document loader capabilities to handle Word and text files.
 - Enhanced Retrieval: Introduce ranking algorithms for more accurate context selection.
