@@ -60,9 +60,11 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
 - Python 3.8 or higher
 - OpenAI API key (securely stored in a .env file)
 - Clone this repository:
-  ```bash git clone <repository_url>
+  ```bash
+  git clone <repository_url>
 - Nagivate to you repository:
-  \`\`\`cd rag-chatbot
+  ```bash
+  cd rag-chatbot
 - Install your dependencies:
   \`\`\`pip install -r requirements.txt
 - Setup your openai_api_key in .env file:
