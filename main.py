@@ -1,3 +1,4 @@
+# importing the libraries
 from langchain_openai import OpenAI
 from langchain_community.vectorstores import FAISS
 from langchain.text_splitter import RecursiveCharacterTextSplitter
@@ -7,20 +8,37 @@ from langchain.chains.combine_documents import create_stuff_documents_chain
 from langchain.prompts import ChatPromptTemplate
 from langchain_community.document_loaders import PyPDFLoader
 from fastapi import FastAPI,HTTPException
+from pydantic import BaseModel
+from typing import List
 
 
 from dotenv import load_dotenv
-
+# To load the env file to get the api-key
 load_dotenv()
+
+#defines a structure for user inputs
+class QuestionRequest(BaseModel):
+    question:str
+
+#defines a structure for output 
+class AnswerDetail(BaseModel):
+    answer: str
+    source: str
+    page: int
+
+#defines a structure for final response
+class QuestionResponse(BaseModel):
+    result:List[AnswerDetail]
 
 PDF_PATH = "Documents/attention-is-all-you-need-Paper.pdf"
 
+# This function takes the pdf_path extract the text and returns the content in strings
 def get_pdf_text(PDF_PATH):
     pdf_reader = PyPDFLoader(PDF_PATH)
     documents = pdf_reader.load()
     return documents
 
-
+# This functions takes the documents and split into chunks , adds the page_content and metadata and returns the list of chunks
 def get_chunks(documents):
     text_splitter = RecursiveCharacterTextSplitter(chunk_size = 500, chunk_overlap=100)
     chunks = []
@@ -33,6 +51,8 @@ def get_chunks(documents):
             })
     return chunks
 
+# This function creates a vectorestore using faiss for efficient retrieval and searching
+# Embedding are generated for each text and metadata is stored for reference
 def get_vectorstore(chunks):
     embeddings = OpenAIEmbeddings()
     texts = [chunk["page_content"]for chunk in chunks]
@@ -41,6 +61,9 @@ def get_vectorstore(chunks):
     vectorstore.save_local("FAISS_DB")
     return vectorstore
 
+# This function is designed to generate responses to questions based on relevant documents retrieved from the vectorstore
+# uses openai model and rag for context-aware answers
+# Returns reponses with the answer, source and page number for traceability
 def generate_response(vectorstore,question:str):
     retriever = vectorstore.as_retriever(search_type="similarity", search_kwargs={"k":7})
     llm = OpenAI(temperature=0.4, max_tokens=200)
@@ -70,17 +93,19 @@ def generate_response(vectorstore,question:str):
 
     return {"response": responses}
 
+# Intializing Fastapi
 app= FastAPI()
 
-@app.post("/questioning_pdf/")
-async def process_pdf_questioning(question:str=''):
+# endpoint to process questions related to Pdf_documents
+@app.post("/rag/questioningpdf/chat/", response_model=QuestionResponse)
+async def process_pdf_questioning(request:QuestionRequest):
     try:
         documents = get_pdf_text(PDF_PATH)
         chunks = get_chunks(documents)
         vectorstore = get_vectorstore(chunks)
-        answer = generate_response(vectorstore, question)
+        answer = generate_response(vectorstore, request.question)
         return {
-            "result":answer
+            "result":answer['response']
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
