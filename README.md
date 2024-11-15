@@ -57,18 +57,18 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
                  |  JSON Response    |
                  +-------------------+
 ## Get started
-    - Python 3.8 or higher
-    - OpenAI API key (securely stored in a .env file)
-    - Clone this repository: git clone <repository_url>
-    - Nagivate to you repository: cd rag-chatbot
-    - Install your dependencies: pip install -r requirements.txt
-    - Setup your openai_api_key in .env file: OPENAI_API_KEY=your_openai_api_key
-    - Place your documents in the Documents path
-    - Start fastapi server: uvicorn main:app --reload
+- Python 3.8 or higher
+- OpenAI API key (securely stored in a .env file)
+- Clone this repository: git clone <repository_url>
+- Nagivate to you repository: cd rag-chatbot
+- Install your dependencies: pip install -r requirements.txt
+- Setup your openai_api_key in .env file: OPENAI_API_KEY=your_openai_api_key
+- Place your documents in the Documents path
+- Start fastapi server: uvicorn main:app --reload
 ## API Documentation
-    - Endpoint: /rag/questioningpdf/chat
-    - Methoed: POST
-    - Description: Processes user questions, retrieves relevant document context, and generates a response.
+- Endpoint: /rag/questioningpdf/chat
+- Methoed: POST
+- Description: Processes user questions, retrieves relevant document context, and generates a response.
     Request Body:
         {
             "question": "What is the capital of France?"
@@ -84,10 +84,10 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
             ]
         }
 ## Future Improvements
-    - Support for Additional Formats: Extend document loader capabilities to handle Word and text files.
-    - Enhanced Retrieval: Introduce ranking algorithms for more accurate context selection.
-    - Conversation Memory: Allow the chatbot to retain session-based context for improved multi-turn conversations.
-    - Performance Optimization: Implement caching or sharding for scaling with larger datasets.
+- Support for Additional Formats: Extend document loader capabilities to handle Word and text files.
+- Enhanced Retrieval: Introduce ranking algorithms for more accurate context selection.
+- Conversation Memory: Allow the chatbot to retain session-based context for improved multi-turn conversations.
+- Performance Optimization: Implement caching or sharding for scaling with larger datasets.
 
 
     
