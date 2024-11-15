@@ -61,7 +61,7 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
 - OpenAI API key (securely stored in a .env file)
 - Clone this repository:
   ```bash
-  git clone <repository_url>
+  git clone <https://github.com/LIJO20041997/RAG_Chatbot.git>
 - Nagivate to you repository:
   ```bash
   cd rag-chatbot
@@ -80,7 +80,7 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
 - Methoed: POST
 - Description: Processes user questions, retrieves relevant document context, and generates a response.
   ```bash
-  Request Body:
+    Request Body:
         {
             "question": "What is the capital of France?"
         }
