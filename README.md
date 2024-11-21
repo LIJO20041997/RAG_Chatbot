@@ -74,7 +74,7 @@ The RAG chatbot uses a combination of document retrieval and generation to answe
 - Place your documents in the Documents path
 - Start fastapi server:
   ```bash
-  uvicorn main:app --reload
+  python main.py
 ## API Documentation
 - Endpoint: /rag/questioningpdf/chat
 - Methoed: POST
