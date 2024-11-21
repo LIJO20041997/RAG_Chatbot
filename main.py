@@ -10,6 +10,7 @@ from langchain_community.document_loaders import PyPDFLoader
 from fastapi import FastAPI,HTTPException
 from pydantic import BaseModel
 from typing import List
+import uvicorn
 
 
 from dotenv import load_dotenv
@@ -110,6 +111,9 @@ async def process_pdf_questioning(request:QuestionRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
+
+if __name__ == "__main__":
+    uvicorn.run(app,host='127.0.0.1',port=8000)
 
 
 
